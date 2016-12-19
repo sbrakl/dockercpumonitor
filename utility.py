@@ -1,4 +1,5 @@
 import logging
+import random
 
 def get_CPU_Percentage(con):
 
@@ -20,11 +21,11 @@ def get_CPU_Percentage(con):
     prestats_totalusage = prestats['cpu_usage']['total_usage']
     stats_totalusage = cpustats['cpu_usage']['total_usage']
     numOfCPUCore = len(cpustats['cpu_usage']['percpu_usage'])
-    logging.info('prestats_totalusage: %s, stats_totalusage: %s, NoOfCore: %s' % (prestats_totalusage, stats_totalusage, numOfCPUCore))
+    logging.debug('prestats_totalusage: %s, stats_totalusage: %s, NoOfCore: %s' % (prestats_totalusage, stats_totalusage, numOfCPUCore))
 
     prestats_syscpu = prestats['system_cpu_usage']
     stats_syscpu = cpustats['system_cpu_usage']
-    logging.info('prestats_syscpu: %s, stats_syscpu: %s' % (prestats_syscpu, stats_syscpu))
+    logging.debug('prestats_syscpu: %s, stats_syscpu: %s' % (prestats_syscpu, stats_syscpu))
 
     cpuDelta = stats_totalusage - prestats_totalusage
     systemDelta = stats_syscpu - prestats_syscpu
@@ -32,7 +33,13 @@ def get_CPU_Percentage(con):
     if cpuDelta > 0 and systemDelta > 0:
         cpupercentage = (cpuDelta / systemDelta) * numOfCPUCore
 
-    formattedcpupert = '{:.1%}'.format(cpupercentage);
-    logging.info('cpuDelta: %s, systemDelta: %s, cpu: %s' % (cpuDelta, systemDelta, cpupercentage))
+    formattedcpupert = '{:.1%}'.format(cpupercentage)
+    logging.debug('cpuDelta: %s, systemDelta: %s, cpu: %s' % (cpuDelta, systemDelta, cpupercentage))
 
     print('"%s" Container CPU: %s ' % (conName, formattedcpupert))
+
+    return cpupercentage
+
+
+def fake_get_CPU_Percentage(con):    
+    return random.uniform(0,100)
