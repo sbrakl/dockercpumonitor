@@ -1,39 +1,40 @@
 import docker
 import time
 import utility
+import clientConn
 import logging
+import os
 
 
 def main():
+    containerToMonitor = 'stress'
+    #containerToMonitor = 'ndsapprelease0858_ndspublicengagement-esb--release_1'
+
+
     logging.basicConfig(level=logging.INFO)
     logging.info('Main: started')
 
-    #cli = docker.DockerClient(base_url='unix://var/run/docker.sock')
-    tls_config = docker.tls.TLSConfig(
-        ca_cert='/home/azureuser/ca.pem',
-  	client_cert=('/home/azureuser/cert.pem', '/home/azureuser/key.pem'),
-  	verify=True
-    )
-    cli = docker.DockerClient(base_url='https://ape-swarm-manager:3376',
-           tls=tls_config,
-	   version='1.23') 
-   
-    '''
-    conlist = cli.containers.list()
+    cli = clientConn.GetDockerClient('local')
 
-    for con in conlist:
-        print(con.name)
-    '''
-
-    con = cli.containers.get('ndsapprelease0858_ndspublicengagement-esb--release_1')
+    try:
+        con = cli.containers.get(containerToMonitor)
+    except Exception as e:
+        logging.warning('Cant find "%s" container running' % containerToMonitor)
+        logging.error(e)
+        exit()
 
     cpuseries = [0.,0.,0.,0.,0.]
 
     count = 0
     while (count < 9):
         time.sleep(2)
-        cpu = utility.get_CPU_Percentage(con)
-        logging.info('Currret CPU: %s' % cpu)
+
+        try:
+            cpu = utility.get_CPU_Percentage(con)
+        except:
+            cpu = 0.
+
+        logging.debug('Currret CPU: %s' % cpu)
 
         cpuseries.append(cpu)
 
@@ -41,8 +42,22 @@ def main():
             cpuseries.pop(0)
         
         logging.debug(cpuseries)
-        logging.info('Mean: %s' % (sum(cpuseries)/len(cpuseries)))
+        meanCPU = (sum(cpuseries)/len(cpuseries))
+        logging.info('Mean CPU: %s' % meanCPU)
         count += 1
+
+        containCount = 1
+        if (meanCPU > 50):
+            os.system('echo "Scale container up"')
+            containCount += 1
+            print('Wating for couple of minutes to container to start')
+            time.sleep(30)
+        elif (meanCPU < 50 and containCount > 1):
+            os.system('echo "Scale container down"')
+            containCount -= 1
+        elif (meanCPU < 50):
+            print('Idle CPU, no action')
+
 
     logging.info('Main: end')
 

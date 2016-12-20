@@ -6,6 +6,11 @@ def get_CPU_Percentage(con):
     conName = con.name
     cpupercentage = 0.0
 
+
+    #Check if the container is running
+    if (con.status != 'running'):
+        raise ValueError('"%s" container is not running' % conName)
+
     # Get CPU Usage in percentage
     constat = con.stats(stream=False)
     prestats = constat['precpu_stats']
