@@ -36,9 +36,9 @@ def get_CPU_Percentage(con):
     formattedcpupert = '{:.1%}'.format(cpupercentage)
     logging.debug('cpuDelta: %s, systemDelta: %s, cpu: %s' % (cpuDelta, systemDelta, cpupercentage))
 
-    print('"%s" Container CPU: %s ' % (conName, formattedcpupert))
+    logging.info('"%s" Container CPU: %s ' % (conName, formattedcpupert))
 
-    return cpupercentage
+    return (cpupercentage * 100)
 
 
 def fake_get_CPU_Percentage(con):    
