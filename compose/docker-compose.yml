@@ -1,0 +1,5 @@
+version: '2'
+services:
+  stress:
+    image: progrium/stress
+    command: --cpu 1 --timeout 30s

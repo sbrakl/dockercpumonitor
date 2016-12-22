@@ -11,3 +11,9 @@ docker run -d -e STRESS_SYSTEM_FOR=60s --name stress petarmaric/docker.cpu-stres
 
 # Get docker CPU usage
 http://stackoverflow.com/questions/30271942/get-docker-container-cpu-usage-as-percentage
+
+# Another image for stressing CPU
+https://github.com/progrium/docker-stress
+
+# docker ps command to see full command
+docker ps -a --no-trunc
