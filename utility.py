@@ -1,5 +1,7 @@
 import logging
 import random
+import datetime
+import collections
 
 def get_CPU_Percentage(con):
 
@@ -48,3 +50,39 @@ def get_CPU_Percentage(con):
 
 def fake_get_CPU_Percentage(con):    
     return random.uniform(0,100)
+
+def ScaleContaienr(meanCPU, end_Cool_time, containerCount):
+
+    coolPeriod = 30
+
+    curr_time = datetime.datetime.now()
+
+    if (end_Cool_time and (curr_time < end_Cool_time)):
+        # Means, cooling time if on, don't do anything
+        logging.info('No scaling action, Cooling period going on...')
+    else:
+        if (meanCPU > 50):
+            containerCount += 1
+            print('Scaling Container UP to %s' % containerCount)
+            end_Cool_time = curr_time + datetime.timedelta(seconds=coolPeriod)
+        elif (meanCPU < 50 and containerCount > 1):
+            containerCount -= 1
+            end_Cool_time = curr_time + datetime.timedelta(seconds=coolPeriod)
+            print('Scaling down containers to %s' % containerCount)
+        elif (meanCPU < 50):
+            logging.info('Idle CPU, no action')
+
+    return end_Cool_time, containerCount
+
+def handleCPUSeries(cpuseries, cpu):
+    logging.debug('Currret CPU: %s' % cpu)
+
+    cpuseries.append(cpu)
+
+    if (len(cpuseries) > 5):
+        cpuseries.pop(0)
+
+    logging.debug(cpuseries)
+    meanCPU = (sum(cpuseries) / len(cpuseries))
+    logging.info('Mean CPU: %s' % meanCPU)
+    return meanCPU
